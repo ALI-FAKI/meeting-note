@@ -84,7 +84,22 @@ body {
     gap: 12px;
 }
 
-/* ✅ LARGER TEXTAREA – allows seeing several lines */
+.title-input {
+    padding: 12px 16px;
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: border-color 0.2s;
+}
+
+.title-input:focus {
+    outline: none;
+    border-color: #334155;
+    box-shadow: 0 0 0 3px rgba(51, 65, 85, 0.1);
+}
+
 textarea {
     width: 100%;
     padding: 14px 16px;
@@ -93,7 +108,7 @@ textarea {
     font-family: inherit;
     font-size: 0.95rem;
     resize: vertical;
-    min-height: 50vh;   /* half the viewport height */
+    min-height: 50vh;
     transition: border-color 0.2s;
     line-height: 1.6;
 }
@@ -177,42 +192,69 @@ textarea:focus {
     background: #fee2e2;
 }
 
+/* ─── NOTES LIST ─── */
 .notes-list {
     list-style: none;
 }
 
-.notes-list li {
+.note-item {
     background: #f8fafc;
     border-radius: 10px;
-    padding: 14px 16px;
     margin-bottom: 10px;
     border-left: 4px solid #334155;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    animation: fadeIn 0.3s ease;
+    transition: all 0.2s;
+    overflow: hidden;
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(5px); }
-    to { opacity: 1; transform: translateY(0); }
+.note-item.expanded {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.note-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 14px 16px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.note-header:hover {
+    background: #f1f5f9;
+}
+
+.note-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0;
+}
+
+.note-header-time {
+    font-size: 0.8rem;
+    color: #64748b;
+    white-space: nowrap;
+}
+
+.note-body {
+    padding: 0 16px 16px 16px;
+    display: none;
+    animation: fadeIn 0.2s ease;
+}
+
+.note-item.expanded .note-body {
+    display: block;
 }
 
 .note-text {
     font-size: 0.95rem;
     color: #1e293b;
-    white-space: pre-wrap;   /* preserves line breaks */
+    white-space: pre-wrap;
     word-break: break-word;
-    flex: 1;
+    margin-bottom: 12px;
 }
 
-.note-time {
-    font-size: 0.8rem;
-    color: #64748b;
-    font-weight: 500;
-}
-
-/* Note actions (edit/delete) */
 .note-actions {
     display: flex;
     gap: 10px;
