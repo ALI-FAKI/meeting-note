@@ -187,7 +187,7 @@ textarea:focus {
     border-left: 4px solid #334155;
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 8px;
     animation: fadeIn 0.3s ease;
 }
 
@@ -201,12 +201,48 @@ textarea:focus {
     color: #1e293b;
     white-space: pre-wrap;   /* preserves line breaks */
     word-break: break-word;
+    flex: 1;
 }
 
 .note-time {
     font-size: 0.8rem;
     color: #64748b;
     font-weight: 500;
+}
+
+/* Note actions (edit/delete) */
+.note-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.btn-icon {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 6px;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    transition: all 0.2s;
+}
+
+.btn-icon:hover {
+    background: #e2e8f0;
+    color: #1e293b;
+}
+
+.btn-icon.delete:hover {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+.btn-icon svg {
+    width: 18px;
+    height: 18px;
+    fill: currentColor;
 }
 
 .empty-state {
