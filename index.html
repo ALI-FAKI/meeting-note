@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meeting Notes Taker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <div class="app-container">
+
+        <!-- Header -->
+        <header class="app-header">
+            <div class="logo-icon">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
+                </svg>
+            </div>
+            <h1>Meeting Notes Taker</h1>
+            <p>Capture ideas, action items, and decisions quickly.</p>
+        </header>
+
+        <!-- Main content -->
+        <main class="main-content">
+
+            <!-- Note input section -->
+            <section class="input-section">
+                <h2>Add a New Note</h2>
+                <div class="input-group">
+                    <textarea id="note-input" placeholder="Type your note here..." rows="3"></textarea>
+                    <button id="add-note-btn" class="btn-primary">
+                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                        </svg>
+                        Add Note
+                    </button>
+                </div>
+            </section>
+
+            <!-- Notes list section -->
+            <section class="notes-section">
+                <div class="section-header">
+                    <h2>Meeting Notes</h2>
+                    <div class="actions">
+                        <button id="download-btn" class="btn-secondary">
+                            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+                            </svg>
+                            Download .txt
+                        </button>
+                        <button id="clear-btn" class="btn-secondary danger">
+                            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                            </svg>
+                            Clear All
+                        </button>
+                    </div>
+                </div>
+                <ul id="notes-list" class="notes-list"></ul>
+                <p id="empty-state" class="empty-state">No notes yet. Start by adding one above.</p>
+            </section>
+
+        </main>
+
+        <!-- Footer -->
+        <footer class="app-footer">
+            <p>Notes are saved automatically in your browser.</p>
+        </footer>
+
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
