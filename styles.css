@@ -70,7 +70,6 @@ body {
     padding: 30px;
 }
 
-/* Input section */
 .input-section h2,
 .notes-section h2 {
     font-size: 1.2rem;
@@ -215,7 +214,95 @@ textarea:focus {
     font-style: italic;
 }
 
-/* ─── FOOTER ─── */
+/* ─── PROMO FOOTER ─── */
+.promo-footer {
+    background: linear-gradient(135deg, #0f2b5b 0%, #1a4a8a 100%);
+    color: white;
+    padding: 20px 30px;
+}
+
+.promo-content {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.promo-icon {
+    width: 48px;
+    height: 48px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.promo-icon svg {
+    width: 26px;
+    height: 26px;
+    fill: white;
+}
+
+.promo-text {
+    flex: 1;
+    min-width: 200px;
+}
+
+.promo-text p {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    opacity: 0.8;
+    margin-bottom: 2px;
+}
+
+.promo-text a {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: white;
+    text-decoration: none;
+    display: inline-block;
+    margin-right: 8px;
+}
+
+.promo-text a:hover {
+    text-decoration: underline;
+}
+
+.promo-text span {
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+.promo-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: white;
+    color: #0f2b5b;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-decoration: none;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.promo-btn:hover {
+    background: #f1f5f9;
+    transform: translateY(-1px);
+}
+
+.promo-btn svg {
+    width: 16px;
+    height: 16px;
+    fill: currentColor;
+}
+
+/* ─── APP FOOTER ─── */
 .app-footer {
     background: #f8fafc;
     padding: 16px 30px;
@@ -245,5 +332,13 @@ textarea:focus {
     }
     .btn-secondary {
         flex: 1;
+    }
+    .promo-content {
+        flex-direction: column;
+        text-align: center;
+    }
+    .promo-text span {
+        display: block;
+        margin-top: 4px;
     }
 }
