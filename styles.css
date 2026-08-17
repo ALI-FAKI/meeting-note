@@ -84,6 +84,7 @@ body {
     gap: 12px;
 }
 
+/* ✅ LARGER TEXTAREA – allows seeing several lines */
 textarea {
     width: 100%;
     padding: 14px 16px;
@@ -92,8 +93,9 @@ textarea {
     font-family: inherit;
     font-size: 0.95rem;
     resize: vertical;
-    min-height: 80px;
+    min-height: 50vh;   /* half the viewport height */
     transition: border-color 0.2s;
+    line-height: 1.6;
 }
 
 textarea:focus {
