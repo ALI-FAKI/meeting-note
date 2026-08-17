@@ -7,7 +7,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const addNoteBtn = document.getElementById('add-note-btn');
     const notesList = document.getElementById('notes-list');
     const emptyState = document.getElementById('empty-state');
-    const downloadBtn = document.getElementById('download-btn');
+    const downloadTxtBtn = document.getElementById('download-txt-btn');
+    const downloadDocBtn = document.getElementById('download-doc-btn');
+    const downloadPdfBtn = document.getElementById('download-pdf-btn');
     const clearBtn = document.getElementById('clear-btn');
 
     // ─── localStorage Key ───
@@ -86,7 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ─── Download Notes as .txt ───
-    function downloadNotes() {
+    function downloadTxt() {
         const notes = loadNotes();
         if (notes.length === 0) {
             alert('No notes to download.');
@@ -95,7 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         let content = 'Meeting Notes\n';
         content += '====================\n\n';
-        notes.forEach((note, index) => {
+        notes.forEach((note) => {
             const date = new Date(note.timestamp).toLocaleString();
             content += `[${date}] ${note.text}\n`;
         });
@@ -109,6 +111,91 @@ document.addEventListener('DOMContentLoaded', () => {
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
+    }
+
+    // ─── Download Notes as .doc (Word-compatible) ───
+    function downloadDoc() {
+        const notes = loadNotes();
+        if (notes.length === 0) {
+            alert('No notes to download.');
+            return;
+        }
+
+        let htmlContent = `
+            <html>
+            <head>
+                <meta charset="UTF-8">
+                <title>Meeting Notes</title>
+                <style>
+                    body { font-family: Arial, sans-serif; margin: 40px; }
+                    h1 { color: #333; }
+                    .note { margin-bottom: 12px; border-left: 3px solid #ccc; padding-left: 10px; }
+                    .note-time { color: #888; font-size: 12px; }
+                </style>
+            </head>
+            <body>
+                <h1>Meeting Notes</h1>
+        `;
+
+        notes.forEach(note => {
+            const date = new Date(note.timestamp).toLocaleString();
+            htmlContent += `
+                <div class="note">
+                    <p>${note.text.replace(/\n/g, '<br>')}</p>
+                    <p class="note-time">${date}</p>
+                </div>
+            `;
+        });
+
+        htmlContent += '</body></html>';
+
+        const blob = new Blob(['\ufeff', htmlContent], { type: 'application/msword' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `meeting-notes-${new Date().toISOString().slice(0,10)}.doc`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    // ─── Save as PDF (via print dialog) ───
+    function downloadPdf() {
+        const notes = loadNotes();
+        if (notes.length === 0) {
+            alert('No notes to download.');
+            return;
+        }
+
+        // Create a hidden print-friendly div
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write(`
+            <html>
+            <head>
+                <title>Meeting Notes</title>
+                <style>
+                    body { font-family: Arial, sans-serif; margin: 30px; }
+                    h1 { color: #333; }
+                    .note { margin-bottom: 12px; border-left: 3px solid #ccc; padding-left: 10px; }
+                    .note-time { color: #888; font-size: 12px; }
+                </style>
+            </head>
+            <body>
+                <h1>Meeting Notes</h1>
+        `);
+        notes.forEach(note => {
+            const date = new Date(note.timestamp).toLocaleString();
+            printWindow.document.write(`
+                <div class="note">
+                    <p>${note.text.replace(/\n/g, '<br>')}</p>
+                    <p class="note-time">${date}</p>
+                </div>
+            `);
+        });
+        printWindow.document.write('</body></html>');
+        printWindow.document.close();
+        printWindow.print();
     }
 
     // ─── Clear All Notes ───
@@ -127,7 +214,9 @@ document.addEventListener('DOMContentLoaded', () => {
             addNote();
         }
     });
-    downloadBtn.addEventListener('click', downloadNotes);
+    downloadTxtBtn.addEventListener('click', downloadTxt);
+    downloadDocBtn.addEventListener('click', downloadDoc);
+    downloadPdfBtn.addEventListener('click', downloadPdf);
     clearBtn.addEventListener('click', clearNotes);
 
     // ─── Initial Render ───
