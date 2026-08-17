@@ -5,12 +5,17 @@ document.addEventListener('DOMContentLoaded', () => {
     // ─── DOM Elements ───
     const noteInput = document.getElementById('note-input');
     const addNoteBtn = document.getElementById('add-note-btn');
+    const cancelEditBtn = document.getElementById('cancel-edit-btn');
     const notesList = document.getElementById('notes-list');
     const emptyState = document.getElementById('empty-state');
     const downloadTxtBtn = document.getElementById('download-txt-btn');
     const downloadDocBtn = document.getElementById('download-doc-btn');
     const downloadPdfBtn = document.getElementById('download-pdf-btn');
     const clearBtn = document.getElementById('clear-btn');
+    const formTitle = document.getElementById('form-title');
+
+    // ─── State ───
+    let editingId = null;  // id of note currently being edited
 
     // ─── localStorage Key ───
     const STORAGE_KEY = 'meetingNotes';
@@ -39,15 +44,57 @@ document.addEventListener('DOMContentLoaded', () => {
         emptyState.style.display = 'none';
         notes.forEach(note => {
             const li = document.createElement('li');
-            li.innerHTML = `
-                <span class="note-text">${escapeHTML(note.text)}</span>
-                <span class="note-time">${formatTimestamp(note.timestamp)}</span>
+            li.dataset.id = note.id;
+
+            // Note text
+            const textSpan = document.createElement('span');
+            textSpan.className = 'note-text';
+            textSpan.textContent = note.text;
+
+            // Timestamp
+            const timeSpan = document.createElement('span');
+            timeSpan.className = 'note-time';
+            timeSpan.textContent = formatTimestamp(note.timestamp);
+
+            // Action buttons container
+            const actionsDiv = document.createElement('div');
+            actionsDiv.className = 'note-actions';
+
+            // Edit button
+            const editBtn = document.createElement('button');
+            editBtn.className = 'btn-icon edit';
+            editBtn.innerHTML = `
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                    <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                </svg>
             `;
+            editBtn.title = 'Edit note';
+            editBtn.addEventListener('click', () => startEdit(note.id));
+
+            // Delete button
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'btn-icon delete';
+            deleteBtn.innerHTML = `
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                    <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                </svg>
+            `;
+            deleteBtn.title = 'Delete note';
+            deleteBtn.addEventListener('click', () => deleteNote(note.id));
+
+            actionsDiv.appendChild(editBtn);
+            actionsDiv.appendChild(deleteBtn);
+
+            li.appendChild(textSpan);
+            li.appendChild(timeSpan);
+            li.appendChild(actionsDiv);
+
             notesList.appendChild(li);
         });
     }
 
-    // ─── Escape HTML to prevent XSS ───
+    // ─── Escape HTML (if needed, but we use textContent) ───
+    // Not needed when using textContent, but kept for compatibility
     function escapeHTML(str) {
         const div = document.createElement('div');
         div.textContent = str;
@@ -67,8 +114,8 @@ document.addEventListener('DOMContentLoaded', () => {
         return date.toLocaleDateString(undefined, options);
     }
 
-    // ─── Add New Note ───
-    function addNote() {
+    // ─── Add New Note or Update Existing ───
+    function handleAddOrUpdate() {
         const text = noteInput.value.trim();
         if (!text) {
             alert('Please enter a note before adding.');
@@ -76,14 +123,87 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const notes = loadNotes();
-        const newNote = {
-            text: text,
-            timestamp: Date.now()
-        };
-        notes.push(newNote);
+
+        if (editingId !== null) {
+            // Update existing note
+            const index = notes.findIndex(note => note.id === editingId);
+            if (index !== -1) {
+                notes[index].text = text;
+                notes[index].timestamp = Date.now(); // update timestamp to reflect edit time
+            }
+            editingId = null;
+            cancelEditBtn.style.display = 'none';
+            addNoteBtn.innerHTML = `
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                    <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                </svg>
+                Add Note
+            `;
+            formTitle.textContent = 'Add a New Note';
+        } else {
+            // Add new note
+            const newNote = {
+                id: Date.now(), // unique id based on timestamp
+                text: text,
+                timestamp: Date.now()
+            };
+            notes.push(newNote);
+        }
+
         saveNotes(notes);
         noteInput.value = '';
         noteInput.focus();
+        renderNotes();
+    }
+
+    // ─── Start Editing a Note ───
+    function startEdit(id) {
+        const notes = loadNotes();
+        const note = notes.find(n => n.id === id);
+        if (!note) return;
+
+        editingId = id;
+        noteInput.value = note.text;
+        noteInput.focus();
+
+        // Update UI
+        formTitle.textContent = 'Edit Note';
+        addNoteBtn.innerHTML = `
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+            </svg>
+            Update Note
+        `;
+        cancelEditBtn.style.display = 'inline-flex';
+    }
+
+    // ─── Cancel Edit ───
+    function cancelEdit() {
+        editingId = null;
+        noteInput.value = '';
+        formTitle.textContent = 'Add a New Note';
+        addNoteBtn.innerHTML = `
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+            </svg>
+            Add Note
+        `;
+        cancelEditBtn.style.display = 'none';
+    }
+
+    // ─── Delete a Single Note ───
+    function deleteNote(id) {
+        if (!confirm('Delete this note?')) return;
+
+        let notes = loadNotes();
+        notes = notes.filter(note => note.id !== id);
+        saveNotes(notes);
+
+        // If we were editing this note, cancel edit mode
+        if (editingId === id) {
+            cancelEdit();
+        }
+
         renderNotes();
     }
 
@@ -168,7 +288,6 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Create a hidden print-friendly div
         const printWindow = window.open('', '_blank');
         printWindow.document.write(`
             <html>
@@ -202,16 +321,18 @@ document.addEventListener('DOMContentLoaded', () => {
     function clearNotes() {
         if (confirm('Are you sure you want to delete all notes?')) {
             localStorage.removeItem(STORAGE_KEY);
+            cancelEdit(); // exit edit mode if active
             renderNotes();
         }
     }
 
     // ─── Event Listeners ───
-    addNoteBtn.addEventListener('click', addNote);
+    addNoteBtn.addEventListener('click', handleAddOrUpdate);
+    cancelEditBtn.addEventListener('click', cancelEdit);
     noteInput.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
-            addNote();
+            handleAddOrUpdate();
         }
     });
     downloadTxtBtn.addEventListener('click', downloadTxt);
