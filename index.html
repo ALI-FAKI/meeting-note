@@ -8,6 +8,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
+    <!-- jsPDF library for true PDF export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
 
@@ -60,13 +62,13 @@
                             <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
                                 <path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm4 18H6V4h7v5h5v11z"/>
                             </svg>
-                            Download .doc
+                            Download Word
                         </button>
                         <button id="download-pdf-btn" class="btn-secondary">
                             <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
                                 <path d="M19 8H5v14h14V8zm-2 7H7v-2h10v2zm0 4H7v-2h10v2zm0-8H7V9h10v2z"/>
                             </svg>
-                            Save as PDF
+                            Download PDF
                         </button>
                         <button id="clear-btn" class="btn-secondary danger">
                             <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
