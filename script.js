@@ -265,7 +265,7 @@ document.addEventListener('DOMContentLoaded', () => {
         URL.revokeObjectURL(url);
     }
 
-    // ─── Download Notes as .doc (Word-compatible) ───
+    // ─── Download Notes as Editable Word Document (.doc) ───
     function downloadDoc() {
         const notes = loadNotes();
         if (notes.length === 0) {
@@ -273,38 +273,26 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        let htmlContent = `
-            <html>
-            <head>
-                <meta charset="UTF-8">
-                <title>Meeting Notes</title>
-                <style>
-                    body { font-family: Arial, sans-serif; margin: 40px; }
-                    h1 { color: #333; }
-                    .note { margin-bottom: 12px; border-left: 3px solid #ccc; padding-left: 10px; }
-                    .note-title { font-weight: bold; font-size: 16px; margin-bottom: 4px; }
-                    .note-time { color: #888; font-size: 12px; }
-                    .note-text { white-space: pre-wrap; }
-                </style>
-            </head>
-            <body>
-                <h1>Meeting Notes</h1>
-        `;
+        let xml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n';
+        xml += '<?mso-application progid="Word.Document"?>\n';
+        xml += '<w:wordDocument xmlns:w="http://schemas.microsoft.com/office/word/2003/wordml">\n';
+        xml += '<w:body>\n';
 
         notes.forEach(note => {
             const date = new Date(note.timestamp).toLocaleString();
-            htmlContent += `
-                <div class="note">
-                    <p class="note-title">${note.title}</p>
-                    <p class="note-time">${date}</p>
-                    <p class="note-text">${note.text.replace(/\n/g, '<br>')}</p>
-                </div>
-            `;
+            xml += '<w:p><w:pPr><w:pStyle w:val="Heading2"/></w:pPr><w:r><w:t>' + escapeXml(note.title) + '</w:t></w:r></w:p>\n';
+            xml += '<w:p><w:r><w:t>' + escapeXml(date) + '</w:t></w:r></w:p>\n';
+            // Split note text by newlines and create separate paragraphs
+            const lines = note.text.split('\n');
+            lines.forEach(line => {
+                xml += '<w:p><w:r><w:t>' + escapeXml(line) + '</w:t></w:r></w:p>\n';
+            });
+            xml += '<w:p><w:r><w:t> </w:t></w:r></w:p>\n'; // empty paragraph for spacing
         });
 
-        htmlContent += '</body></html>';
+        xml += '</w:body>\n</w:wordDocument>';
 
-        const blob = new Blob(['\ufeff', htmlContent], { type: 'application/msword' });
+        const blob = new Blob([xml], { type: 'application/msword' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
@@ -315,7 +303,16 @@ document.addEventListener('DOMContentLoaded', () => {
         URL.revokeObjectURL(url);
     }
 
-    // ─── Save as PDF (via print dialog) ───
+    // ─── Escape XML special characters ───
+    function escapeXml(str) {
+        return str.replace(/&/g, '&amp;')
+                  .replace(/</g, '&lt;')
+                  .replace(/>/g, '&gt;')
+                  .replace(/"/g, '&quot;')
+                  .replace(/'/g, '&apos;');
+    }
+
+    // ─── Download Notes as Real PDF (using jsPDF) ───
     function downloadPdf() {
         const notes = loadNotes();
         if (notes.length === 0) {
@@ -323,38 +320,54 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        const printWindow = window.open('', '_blank');
-        printWindow.document.write(`
-            <html>
-            <head>
-                <title>Meeting Notes</title>
-                <style>
-                    body { font-family: Arial, sans-serif; margin: 30px; }
-                    h1 { color: #333; }
-                    .note { margin-bottom: 12px; border-left: 3px solid #ccc; padding-left: 10px; }
-                    .note-title { font-weight: bold; font-size: 16px; margin-bottom: 4px; }
-                    .note-time { color: #888; font-size: 12px; }
-                    .note-text { white-space: pre-wrap; }
-                </style>
-            </head>
-            <body>
-                <h1>Meeting Notes</h1>
-        `);
+        // Check if jsPDF is loaded
+        if (typeof window.jspdf === 'undefined') {
+            alert('PDF library not loaded. Please check your internet connection and try again.');
+            return;
+        }
 
-        notes.forEach(note => {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+
+        // Title
+        doc.setFontSize(18);
+        doc.text('Meeting Notes', 14, 20);
+
+        let yPos = 30;
+
+        notes.forEach((note, index) => {
+            // Note title
+            doc.setFontSize(14);
+            doc.setFont(undefined, 'bold');
+            doc.text(note.title, 14, yPos);
+            yPos += 8;
+
+            // Timestamp
             const date = new Date(note.timestamp).toLocaleString();
-            printWindow.document.write(`
-                <div class="note">
-                    <p class="note-title">${note.title}</p>
-                    <p class="note-time">${date}</p>
-                    <p class="note-text">${note.text.replace(/\n/g, '<br>')}</p>
-                </div>
-            `);
+            doc.setFontSize(10);
+            doc.setFont(undefined, 'normal');
+            doc.text(date, 14, yPos);
+            yPos += 6;
+
+            // Note text (handling line breaks and wrapping)
+            doc.setFontSize(12);
+            const lines = note.text.split('\n');
+            lines.forEach(line => {
+                const wrapped = doc.splitTextToSize(line, 180);
+                doc.text(wrapped, 14, yPos);
+                yPos += wrapped.length * 5;
+            });
+
+            yPos += 10; // extra spacing between notes
+
+            // Add new page if needed
+            if (yPos > 270) {
+                doc.addPage();
+                yPos = 20;
+            }
         });
 
-        printWindow.document.write('</body></html>');
-        printWindow.document.close();
-        printWindow.print();
+        doc.save(`meeting-notes-${new Date().toISOString().slice(0,10)}.pdf`);
     }
 
     // ─── Clear All Notes ───
